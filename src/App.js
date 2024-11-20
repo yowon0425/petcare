@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Route, Link, Routes, useNavigate } from 'react
 import { collection, addDoc } from "firebase/firestore";
 import { db } from './firebase';
 import nfcIcon from './img/free-icon-nfc-4073545.png';
+import qrCode from './img/qr.png'; // 새로 추가된 import
 import OpenCCTVButton from './OpenCCTVButton';
 
 // WebSocket 연결
@@ -10,21 +11,30 @@ const ws = new WebSocket('ws://localhost:3001');
 
 const NFCTagPage = () => {
   console.log("NFCTagPage rendered");
-  const navigate = useNavigate();
+  const [showQR, setShowQR] = useState(false);
 
   useEffect(() => {
     ws.onmessage = (event) => {
       const message = JSON.parse(event.data);
       if (message.type === 'nfc_update') {
         console.log("New NFC data detected:", message.data);
-        navigate('/dog-info');
+        setShowQR(true);
       }
     };
 
     return () => {
       ws.onmessage = null;
     };
-  }, [navigate]);
+  }, []);
+
+  if (showQR) {
+    return (
+      <div style={styles.container}>
+        <h2 style={styles.qrInstructions}>휴대폰으로 아래 QR에 접속해주세요!</h2>
+        <img src={qrCode} alt="QR Code" style={styles.qrCode} />
+      </div>
+    );
+  }
 
   return (
     <div style={styles.container}>
@@ -118,6 +128,12 @@ const styles = {
     backgroundColor: '#f5f5f5',
     padding: '20px',
   },
+  qrInstructions: {
+    fontSize: '60px',
+    marginBottom: '20px',
+    color: '#333',
+    textAlign: 'center',
+  },
   title: {
     fontSize: '28px',
     marginBottom: '20px',
@@ -172,6 +188,11 @@ const styles = {
     borderRadius: '4px',
     boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
     transition: 'border-color 0.3s',
+  },
+  qrCode: {
+    width: '80%',
+    maxWidth: '300px',
+    height: 'auto',
   },
 };
 
