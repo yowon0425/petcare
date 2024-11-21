@@ -125,40 +125,55 @@ const styles = {
     border: 'none',
     borderRadius: '8px',
     cursor: 'pointer',
-    transition: 'background-color 0.3s',
+    transition: 'background-color 0.3s ease-in-out', // 부드러운 전환 효과 추가
     marginBottom: '20px', // 버튼 아래에 여백 추가
   },
-  error: {
-    color: 'red',
-    fontSize: '18px',
-    textAlign: 'center',
-    marginBottom: '20px',
-  },
-  loadingText: {
-    fontSize: '18px',
-    color: '#666',
-    textAlign: 'center',
-    marginBottom: '20px',
-  },
-  dogFactContainer: {
-    backgroundColor: '#f0f0f0',
-    padding: '20px',
-    borderRadius: '8px',
-    width: '100%',
-    maxWidth: '400px',
-  },
-  dogFactTitle: {
-    fontSize: '22px',
-    color: '#333',
-    marginBottom: '10px',
-    textAlign: 'center',
-  },
-  dogFactText: {
-    fontSize: '18px',
-    color: '#555',
-    textAlign: 'center',
-    lineHeight: '1.4',
-  },
+  buttonActive:{
+     backgroundColor:'#45a049'
+   },
+   error:{
+     color:'red',fontSize:'18px',textAlign:'center',marginBottom:'20px'
+   },
+   loadingText:{
+     fontSize:'18px',color:'#666',textAlign:'center',marginBottom:'20px'
+   },
+   dogFactContainer:{
+     backgroundColor:'#f0f0f0',padding:'20px',borderRadius:'8px',width:'100%',maxWidth:'400px'
+   },
+   dogFactTitle:{
+     fontSize:'22px',color:'#333',marginBottom:'10px',textAlign:'center'
+   },
+   dogFactText:{
+     fontSize:'18px',color:'#555',textAlign:'center',lineHeight:'1.4'
+   }
 };
+
+// 미디어 쿼리 스타일 추가
+const mediaStyles = `
+@media (max-width: 600px) {
+  .container {
+    padding: 20px 10px;
+  }
+  
+  .dogName, .neighborhood {
+    font-size: 24px;
+  }
+  
+  .weatherText {
+    font-size: 20px;
+  }
+  
+  .button {
+    padding: 12px 24px;
+    font-size: 18px;
+  }
+}
+`;
+
+// 스타일 태그를 문서에 추가
+const styleSheet = document.createElement("style");
+styleSheet.type = "text/css";
+styleSheet.innerText = mediaStyles;
+document.head.appendChild(styleSheet);
 
 export default OpenCCTVButton;
