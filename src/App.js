@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Route, Link, Routes, useNavigate } from 'react-router-dom';
-import { collection, addDoc } from "firebase/firestore";
+import { collection, addDoc, getDocs, updateDoc } from "firebase/firestore";
 import { db } from './firebase';
 import nfcIcon from './img/free-icon-nfc-4073545.png';
 import qrCode from './img/qr.png'; // 새로 추가된 import
@@ -56,20 +56,35 @@ const DogInfoPage = () => {
     e.preventDefault();
     if (dogName.trim() !== '' && neighborhood.trim() !== '') {
       try {
-        // Firebase에 데이터 저장
-        const docRef = await addDoc(collection(db, "dogs"), {
+        // 'dogs' 컬렉션에 데이터 저장
+        const dogDocRef = await addDoc(collection(db, "dogs"), {
           name: dogName,
           neighborhood: neighborhood,
-          timestamp: new Date()
+          timestamp: new Date(),
+          flag: true
         });
-        console.log("Document written with ID: ", docRef.id);
+        console.log("Document written with ID: ", dogDocRef.id);
+
+        // 'dogs_poin' 컬렉션에 새 문서 추가
+        const dogsPoinDocRef = await addDoc(collection(db, "dogs_poin"), {
+          center_x: "",
+          center_y: "",
+          name: dogName,
+          pee_x: "",
+          pee_y: "",
+          poo_x: "",
+          poo_y: ""
+        });
+        console.log("dogs_poin document added with ID: ", dogsPoinDocRef.id);
+
         setShowButton(true);
       } catch (error) {
-        console.error("Error adding document: ", error);
+        console.error("Error adding documents: ", error);
         alert("데이터 저장 중 오류가 발생했습니다.");
       }
     }
   };
+
 
   return (
     <div style={styles.container}>
