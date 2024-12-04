@@ -1,23 +1,23 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import axios from 'axios';
 
-const OpenCCTVButton = ({ dogName, neighborhood }) => {
+const WeatherInfoComponent = ({ dogName, neighborhood }) => {
   const [weatherData, setWeatherData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   const getRandomDogFact = () => {
     const dogFacts = [
-      "개의 코 지문은 사람의 지문처럼 고유합니다.",
-      "개는 인간보다 10,000배 더 예민한 후각을 가지고 있습니다.",
-      "개를 쓰다듬으면 혈압과 심박수가 낮아질 수 있습니다.",
-      "개는 약 1,700개의 미뢰를 가지고 있습니다.",
-      "개는 파란색과 노란색을 볼 수 있습니다.",
-      "모든 강아지는 귀가 들리지 않은 상태로 태어납니다.",
-      "개는 자신의 수염을 감각 장치로 사용합니다.",
-      "개는 인간의 암과 혈당 변화를 감지하도록 훈련될 수 있습니다.",
-      "강아지는 하루에 18-20시간 정도 잠을 잡니다.",
-      "개의 귀에는 인간보다 두 배 많은 근육이 있습니다."
+      "개의 코 지문은 사람의 지문처럼 고유합니다. 👃🐾",
+      "개는 인간보다 10,000배 더 예민한 후각을 가지고 있습니다. 🐕👃",
+      "개를 쓰다듬으면 혈압과 심박수가 낮아질 수 있습니다. 🐶❤️",
+      "개는 약 1,700개의 미뢰를 가지고 있습니다. 👅",
+      "개는 파란색과 노란색을 볼 수 있습니다. 👀🌈",
+      "모든 강아지는 귀가 들리지 않은 상태로 태어납니다. 🐕🦻",
+      "개는 자신의 수염을 감각 장치로 사용합니다. 🐾",
+      "개는 인간의 암과 혈당 변화를 감지하도록 훈련될 수 있습니다. 🏥🐕‍🦺",
+      "강아지는 하루에 18-20시간 정도 잠을 잡니다. 💤🐶",
+      "개의 귀에는 인간보다 두 배 많은 근육이 있습니다. 👂🐕"
     ];
     return dogFacts[Math.floor(Math.random() * dogFacts.length)];
   };
@@ -34,10 +34,12 @@ const OpenCCTVButton = ({ dogName, neighborhood }) => {
           `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(neighborhood)}&units=metric&lang=kr&appid=${apiKey}`
         );
 
-        const { main, weather } = response.data;
+        const { main, weather, rain } = response.data;
         setWeatherData({
           temperature: main.temp,
           description: weather[0].description,
+          humidity: main.humidity,
+          precipitation: rain ? rain['1h'] : 0
         });
       } catch (error) {
         console.error('날씨 데이터 요청 실패:', error);
@@ -50,29 +52,32 @@ const OpenCCTVButton = ({ dogName, neighborhood }) => {
     fetchWeather();
   }, [neighborhood]);
 
-  const openCCTV = () => {
-    window.open('https://apps.apple.com/us/app/findelfl/id1190449125', '_blank');
+  const getWeatherEmoji = (description) => {
+    if (description.includes('맑음')) return '☀️';
+    if (description.includes('구름')) return '☁️';
+    if (description.includes('비')) return '🌧️';
+    if (description.includes('눈')) return '❄️';
+    return '🌤️';
   };
 
   return (
     <div style={styles.container}>
-      <h2 style={styles.dogName}>{dogName}의 산책</h2>
-      <h3 style={styles.neighborhood}>{neighborhood}의 날씨</h3>
+      <h2 style={styles.dogName}>🐶 {dogName}의 산책</h2>
+      <h3 style={styles.neighborhood}>📍 {neighborhood}의 날씨</h3>
       {loading ? (
-        <p style={styles.loadingText}>날씨 정보를 불러오는 중...</p>
+        <p style={styles.loadingText}>날씨 정보를 불러오는 중... ⏳</p>
       ) : error ? (
-        <p style={styles.error}>{error}</p>
+        <p style={styles.error}>❌ {error}</p>
       ) : weatherData ? (
         <div style={styles.weatherContainer}>
-          <span style={styles.weatherText}>{weatherData.description}</span>
-          <span style={styles.weatherText}>{weatherData.temperature.toFixed(1)}°C</span>
+          <span style={styles.weatherText}>{getWeatherEmoji(weatherData.description)} {weatherData.description}</span>
+          <span style={styles.weatherText}>🌡️ 온도: {weatherData.temperature.toFixed(1)}°C</span>
+          <span style={styles.weatherText}>💧 습도: {weatherData.humidity}%</span>
+          <span style={styles.weatherText}>☔ 강수량: {weatherData.precipitation}mm</span>
         </div>
       ) : null}
-      <button onClick={openCCTV} style={styles.button}>
-        CCTV 열기
-      </button>
       <div style={styles.dogFactContainer}>
-        <h4 style={styles.dogFactTitle}>알고 계셨나요?</h4>
+        <h4 style={styles.dogFactTitle}>🐾 알고 계셨나요?</h4>
         <p style={styles.dogFactText}>{dogFact}</p>
       </div>
     </div>
@@ -117,34 +122,36 @@ const styles = {
     marginBottom: '10px',
     textAlign: 'center',
   },
-  button: {
-    padding: '16px 32px',
-    fontSize: '20px',
-    backgroundColor: '#4CAF50',
-    color: 'white',
-    border: 'none',
-    borderRadius: '8px',
-    cursor: 'pointer',
-    transition: 'background-color 0.3s ease-in-out', // 부드러운 전환 효과 추가
-    marginBottom: '20px', // 버튼 아래에 여백 추가
+  error: {
+    color: 'red',
+    fontSize: '18px',
+    textAlign: 'center',
+    marginBottom: '20px'
   },
-  buttonActive:{
-     backgroundColor:'#45a049'
-   },
-   error:{
-     color:'red',fontSize:'18px',textAlign:'center',marginBottom:'20px'
-   },
-   loadingText:{
-     fontSize:'18px',color:'#666',textAlign:'center',marginBottom:'20px'
-   },
-   dogFactContainer:{
-     backgroundColor:'#f0f0f0',padding:'20px',borderRadius:'8px',width:'100%',maxWidth:'400px'
+  loadingText: {
+    fontSize:'18px', 
+    color:'#666', 
+    textAlign:'center', 
+    marginBottom:'20px'
+  },
+  dogFactContainer:{
+     backgroundColor:'#f0f0f0', 
+     padding:'20px', 
+     borderRadius:'8px', 
+     width:'100%', 
+     maxWidth:'400px'
    },
    dogFactTitle:{
-     fontSize:'22px',color:'#333',marginBottom:'10px',textAlign:'center'
+     fontSize:'22px', 
+     color:'#333', 
+     marginBottom:'10px', 
+     textAlign:'center'
    },
    dogFactText:{
-     fontSize:'18px',color:'#555',textAlign:'center',lineHeight:'1.4'
+     fontSize:'18px', 
+     color:'#555', 
+     textAlign:'center', 
+     lineHeight:'1.4'
    }
 };
 
@@ -162,11 +169,6 @@ const mediaStyles = `
   .weatherText {
     font-size: 20px;
   }
-  
-  .button {
-    padding: 12px 24px;
-    font-size: 18px;
-  }
 }
 `;
 
@@ -176,4 +178,4 @@ styleSheet.type = "text/css";
 styleSheet.innerText = mediaStyles;
 document.head.appendChild(styleSheet);
 
-export default OpenCCTVButton;
+export default WeatherInfoComponent;
