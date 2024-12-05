@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Route, Link, Routes, useNavigate } from 'react-router-dom';
-import { collection, addDoc, getDocs, updateDoc } from "firebase/firestore";
+import { doc, setDoc, getDoc } from "firebase/firestore";
 import { db } from './firebase';
 import nfcIcon from './img/free-icon-nfc-4073545.png';
 import qrCode from './img/qr.png'; // 새로 추가된 import
@@ -57,35 +57,44 @@ const DogInfoPage = () => {
     e.preventDefault();
     if (dogName.trim() !== '' && neighborhood.trim() !== '') {
       try {
-        // 'dogs' 컬렉션에 데이터 저장
-        const dogDocRef = await addDoc(collection(db, "dogs"), {
+        // 'dogs' 컬렉션에 데이터 저장 또는 업데이트
+        const dogDocRef = doc(db, "dogs", "dogDocument");
+        await setDoc(dogDocRef, {
           name: dogName,
           neighborhood: neighborhood,
           timestamp: new Date(),
           flag: true
-        });
-        console.log("Document written with ID: ", dogDocRef.id);
+        }, { merge: true });
+        console.log("Document written with ID: dogDocument");
 
-        // 'dogs_poin' 컬렉션에 새 문서 추가
-        const dogsPoinDocRef = await addDoc(collection(db, "dogs_poin"), {
-          center_x: "",
-          center_y: "",
-          name: dogName,
-          pee_x: "",
-          pee_y: "",
-          poo_x: "",
-          poo_y: ""
-        });
-        console.log("dogs_poin document added with ID: ", dogsPoinDocRef.id);
+        // 'dogs_poin' 컬렉션에 데이터 저장 또는 업데이트
+        const dogsPoinDocRef = doc(db, "dogs_poin", "dogsPoinDocument");
+        const dogsPoinDoc = await getDoc(dogsPoinDocRef);
+        
+        if (!dogsPoinDoc.exists()) {
+          // 문서가 존재하지 않으면 새로 생성
+          await setDoc(dogsPoinDocRef, {
+            name: dogName,
+            pee_x: "",
+            pee_y: "",
+            poo_x: "",
+            poo_y: "",
+            pee_flag: false,
+            poo_flag: false
+          });
+        } else {
+          // 문서가 존재하면 이름만 업데이트
+          await setDoc(dogsPoinDocRef, { name: dogName }, { merge: true });
+        }
+        console.log("dogs_poin document updated with ID: dogsPoinDocument");
 
         setShowButton(true);
       } catch (error) {
-        console.error("Error adding documents: ", error);
-        alert("데이터 저장 중 오류가 발생했습니다.");
+        console.error("Error handling documents: ", error);
+        alert("데이터 처리 중 오류가 발생했습니다.");
       }
     }
   };
-
 
   return (
     <div style={styles.container}>
